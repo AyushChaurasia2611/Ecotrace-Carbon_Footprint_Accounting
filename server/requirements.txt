@@ -13,3 +13,5 @@ paddlepaddle
 paddleocr
 werkzeug
 flask-mail
+psycopg2-binary
+beautifulsoup4
