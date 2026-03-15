@@ -44,8 +44,8 @@ class AdvancedBillPipeline:
         
         logging.info("Initializing PaddleOCR...")
         try:
-            self.ocr = PaddleOCR(lang='en', show_log=False) if PaddleOCR else None
-            self.table_engine = PPStructure(show_log=False) if PPStructure else None
+            self.ocr = PaddleOCR(lang='en') if PaddleOCR else None
+            self.table_engine = PPStructure() if PPStructure else None
             logging.info("PaddleOCR and PPStructure initialization attempted.")
         except Exception as e:
             logging.error(f"Failed to initialize PaddleOCR: {e}")
