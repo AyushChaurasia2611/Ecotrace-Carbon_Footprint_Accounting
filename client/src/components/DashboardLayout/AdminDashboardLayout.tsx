@@ -28,7 +28,7 @@ export const AdminDashboardLayout: React.FC<LayoutProps> = ({ children }) => {
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    await deferredPrompt.userChoice;
     setDeferredPrompt(null);
   };
 

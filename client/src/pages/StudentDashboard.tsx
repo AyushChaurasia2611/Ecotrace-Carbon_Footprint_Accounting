@@ -59,7 +59,7 @@ const Dashboard: React.FC = () => {
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    await deferredPrompt.userChoice;
     setDeferredPrompt(null);
   };
   const [achievements, setAchievements] = useState<any[]>([]);
