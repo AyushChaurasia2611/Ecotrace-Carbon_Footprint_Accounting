@@ -284,7 +284,9 @@ def forgot_password():
     expires = timedelta(minutes=15)
     reset_token = create_access_token(identity=str(user.id), additional_claims={"reset_password": True}, expires_delta=expires)
     
-    reset_url = f"http://localhost:5173/reset-password?token={reset_token}"
+    # Use Origin header for dynamic reset URLs
+    origin = request.headers.get('Origin') or "http://localhost:5173"
+    reset_url = f"{origin}/reset-password?token={reset_token}"
     
     subject = "EcoTrace Password Reset"
     body = f"Hello {user.name or user.username},\n\nYou requested a password reset. Click the link below to set a new password:\n\n{reset_url}\n\nThis link will expire in 15 minutes."
@@ -980,6 +982,31 @@ def approve_student(student_id):
         db.session.rollback()
         return jsonify({"error": "Failed to approve student."}), 500
 
+# Admin rejects student verification
+@app.route('/api/students/<int:student_id>/reject', methods=['POST'])
+@jwt_required()
+def reject_student(student_id):
+    if get_jwt().get('role').strip() != 'admin':
+        return jsonify({"error": "Admin access required"}), 403
+    
+    student = User.query.get(student_id)
+    if not student or student.role != 'student':
+        return jsonify({"error": "Student not found"}), 404
+    
+    try:
+        student.status = 'rejected'
+        db.session.commit()
+        return jsonify({
+            "message": f"Student {student.username} rejected successfully",
+            "student": {
+                "id": student.id,
+                "status": student.status
+            }
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to reject student."}), 500
+
 
 
 
@@ -1001,8 +1028,15 @@ def delete_student(student_id):
          return jsonify({"error": "Cannot delete non-student users via this endpoint"}), 400
 
     try:
-        # Manually delete associated activity logs to enforce constraint
+        # Manually delete associated related rows to enforce constraint
         ActivityLog.query.filter_by(user_id=student.id).delete()
+        Notification.query.filter_by(user_id=student.id).delete()
+        ChallengeParticipant.query.filter_by(user_id=student.id).delete()
+        CommuteLog.query.filter_by(user_id=student.id).delete()
+        TreePlantation.query.filter_by(user_id=student.id).delete()
+        UserAchievement.query.filter_by(user_id=student.id).delete()
+        EventParticipant.query.filter_by(user_id=student.id).delete()
+        EventProof.query.filter_by(user_id=student.id).delete()
         
         db.session.delete(student)
         db.session.commit()

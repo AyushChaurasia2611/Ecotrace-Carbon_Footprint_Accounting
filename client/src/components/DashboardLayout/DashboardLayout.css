@@ -183,6 +183,10 @@
     align-items: center;
   }
 
+  .main-content {
+    padding: 1rem; /* Prevents oversized text node overlap on mobile viewports */
+  }
+
   .sidebar-header h1,
   .nav-link span,
   .sidebar-section-title,
