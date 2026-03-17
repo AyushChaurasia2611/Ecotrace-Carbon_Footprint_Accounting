@@ -1,4 +1,5 @@
 import os
+import tempfile
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -50,7 +51,7 @@ db_host = db_url.split('@')[-1] if '@' in db_url else 'local file'
 print(f"--- Database Connection: {'Supabase/Postgres' if 'postgresql' in db_url else 'SQLite'} ({db_host}) ---")
 
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['UPLOAD_FOLDER'] = os.path.join(tempfile.gettempdir(), 'uploads')
 db = SQLAlchemy(app)
 CORS(app)
 bcrypt = Bcrypt(app)
@@ -1219,6 +1220,34 @@ def initialize_database():
                     print(f"Added column {col}")
 
         db.session.commit()
+
+        # --- Sync Postgres sequences if applicable ---
+        db_url = os.environ.get('DATABASE_URL', '')
+        if 'postgresql' in db_url or 'supabase' in db_url:
+            try:
+                print("Syncing database sequences to avoid UniqueViolation errors...")
+                with db.engine.connect() as conn:
+                    result = conn.execute(db.text("""
+                        SELECT table_name 
+                        FROM information_schema.tables 
+                        WHERE table_schema = 'public'
+                    """))
+                    tables = [r[0] for r in result]
+                    for table in tables:
+                        try:
+                            seq_res = conn.execute(db.text(f"SELECT pg_get_serial_sequence('\"{table}\"', 'id')")).scalar()
+                            if seq_res:
+                                conn.execute(db.text(f"""
+                                    SELECT setval('{seq_res}', 
+                                           COALESCE((SELECT MAX(id) FROM \"{table}\"), 1), 
+                                           (SELECT MAX(id) IS NOT NULL FROM \"{table}\"))
+                                """))
+                                print(f"Synced sequence for {table}")
+                        except Exception:
+                            pass
+                print("✓ Database sequences synced successfully")
+            except Exception as e:
+                print(f"⚠ Sequence sync failed: {e}")
 
         # Seed 21 High-Fidelity Achievements (Bronze, Silver, Gold)
         try:

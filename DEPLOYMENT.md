@@ -17,10 +17,12 @@ Before you begin, make sure you have:
 ## 1️⃣ Database Setup (Supabase)
 
 1.  Create a new project in [Supabase](https://supabase.com/).
-2.  Go to **Project Settings** -> **Database**.
-3.  Find your **Connection String** (URI) and copy it. It usually looks like:
-    `postgresql://postgres:[YOUR-PASSWORD]@db.[PROJECT-ID].supabase.co:5432/postgres`
-4.  Go to **Project Settings** -> **API** and copy your **Project URL** (`SUPABASE_URL`) and **anon key** (`SUPABASE_KEY`).
+2.  Go to **Project Settings** (Gear icon ⚙️) -> **Database**.
+3.  **⚠️ IMPORTANT FOR HUGGING FACE**: Hugging face containers use **IPv4**. Direct connection in Supabase is moving to **IPv6**. You **MUST** use the **Connection Pooler** string!
+4.  Scroll down to the **Connection pooling** section.
+5.  Copy the **Session mode** connection string.
+6.  Ensure to replace `[YOUR-PASSWORD]` with your actual Database password inside the string!
+7.  Go to **Project Settings** -> **API** and copy your **Project URL** (`SUPABASE_URL`) and **anon key** (`SUPABASE_KEY`).
 
 ---
 

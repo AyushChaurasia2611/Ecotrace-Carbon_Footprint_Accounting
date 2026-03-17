@@ -306,13 +306,13 @@ def get_openrouter_recommendations(hotspot_name: str, co2e_kg: float, percentage
  
  Example: ["Unplug chargers when labs are closed", "Plant more trees on campus", "Use cycles for internal campus travel", "Fix leaking taps in washrooms"]"""
 
-        # Models to try via OpenRouter (Corrected IDs)
+        # Models to try via OpenRouter (Prioritized to avoid initial 404 errors)
         models_to_try = [
+            "google/gemini-2.0-flash-001",
+            "google/gemini-2.0-flash",
             "google/gemini-flash-1.5",
             "google/gemini-pro-1.5",
-            "google/gemini-2.0-flash-exp:free",
-            "google/gemini-2.0-flash-001",
-            "google/gemini-3-flash-preview" # User requested model
+            "google/gemini-3-flash-preview"
         ]
         
         for model in models_to_try:
