@@ -184,6 +184,26 @@ export const AdminDashboardLayout: React.FC<LayoutProps> = ({ children }) => {
       <main className={`main-content ${isExcludedPage ? 'white-bg' : 'light-mint-bg'}`}>
         {children}
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="mobile-bottom-nav">
+        <NavLink to="/dashboard" className="bottom-nav-item" end>
+          <FiGrid size={22} />
+          <span>Dashboard</span>
+        </NavLink>
+        <NavLink to="/dashboard/upload" className="bottom-nav-item">
+          <FiUpload size={22} />
+          <span>Upload</span>
+        </NavLink>
+        <NavLink to="/dashboard/analytics" className="bottom-nav-item">
+          <FiBarChart2 size={22} />
+          <span>Analytics</span>
+        </NavLink>
+        <button className="bottom-nav-item" onClick={() => setSidebarOpen(true)}>
+          <FiMenu size={22} />
+          <span>More</span>
+        </button>
+      </div>
     </div>
   );
 };
