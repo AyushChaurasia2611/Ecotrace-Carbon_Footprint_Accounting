@@ -45,6 +45,23 @@ const Dashboard: React.FC = () => {
     trees_planted: 0,
     events_attended: 0,
   });
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+  };
   const [achievements, setAchievements] = useState<any[]>([]);
   const [selectedStat, setSelectedStat] = useState<{
     title: string;
@@ -81,6 +98,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div
+      className="sd-dashboard-container"
       style={{
         padding: "40px",
         background: "radial-gradient(ellipse at top left, #f1f5f9 0%, #f8fafc 100%)",
@@ -90,6 +108,24 @@ const Dashboard: React.FC = () => {
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+        
+        @media (max-width: 768px) {
+          .sd-dashboard-container {
+            padding: 16px !important;
+          }
+          .sd-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 16px !important;
+          }
+          .sd-achievement-wall {
+            padding: 20px !important;
+            border-radius: 20px !important;
+          }
+          .sd-welcome h1 {
+            font-size: 28px !important;
+          }
+        }
         
         .sd-premium-card {
           background: rgba(255, 255, 255, 0.75);
@@ -141,6 +177,7 @@ const Dashboard: React.FC = () => {
 
       {/* Header */}
       <div
+        className="sd-header"
         style={{
           display: "flex",
           alignItems: "center",
@@ -169,6 +206,27 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {deferredPrompt && (
+            <button 
+              onClick={handleInstallClick}
+              style={{
+                background: '#10b981',
+                color: 'white',
+                border: 'none',
+                padding: '10px 14px',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontWeight: 600,
+                fontSize: '14px',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
+              }}
+            >
+              <Sprout size={16} /> Install
+            </button>
+          )}
           <button 
              onClick={() => navigate('/dashboard/student-analytics')}
              style={{
@@ -193,7 +251,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Welcome Hero */}
-      <div style={{ marginBottom: "40px" }}>
+      <div className="sd-welcome" style={{ marginBottom: "40px" }}>
         <h1 style={{ fontSize: "36px", fontWeight: 800, color: "#0f172a", margin: "0 0 8px 0", letterSpacing: "-0.02em" }}>
           Welcome back, <span style={{ color: "#10b981" }}>{userName}</span>!
         </h1>
@@ -291,8 +349,8 @@ const Dashboard: React.FC = () => {
 
       {/* Achievement Wall */}
       <div
+        className="sd-achievement-wall"
         style={{
-          background: "rgba(255, 255, 255, 0.6)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
           padding: "40px",

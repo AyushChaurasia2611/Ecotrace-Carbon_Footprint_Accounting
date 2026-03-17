@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './DashboardLayout.css';
-import { FiGrid, FiBarChart2, FiUpload, FiLogOut, FiEdit, FiAlertTriangle, FiUsers } from "react-icons/fi";
-import { Leaf } from "lucide-react";
+import { FiGrid, FiBarChart2, FiUpload, FiLogOut, FiEdit, FiAlertTriangle, FiUsers, FiMenu, FiX } from "react-icons/fi";
+import { Leaf, Sprout } from "lucide-react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +13,24 @@ export const AdminDashboardLayout: React.FC<LayoutProps> = ({ children }) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+  };
 
   const handleLogout = () => {
     logout();
@@ -23,7 +41,48 @@ export const AdminDashboardLayout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div className="dashboard-layout">
-      <nav className="sidebar">
+      {/* Mobile Toggle Button */}
+      <button 
+        className="mobile-sidebar-toggle" 
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        style={{
+          position: 'fixed',
+          top: '15px',
+          left: '15px',
+          zIndex: 1100,
+          background: '#10b981',
+          color: 'white',
+          border: 'none',
+          width: '40px',
+          height: '40px',
+          borderRadius: '10px',
+          display: 'none', // Controlled by CSS @media
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1.2rem',
+          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+          cursor: 'pointer'
+        }}
+      >
+        {sidebarOpen ? <FiX /> : <FiMenu />}
+      </button>
+
+      {/* Overlay for mobile sidebar */}
+      {sidebarOpen && (
+        <div 
+          className="sidebar-overlay" 
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.3)',
+            backdropFilter: 'blur(2px)',
+            zIndex: 999
+          }}
+        />
+      )}
+
+      <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo-container">
             <Leaf className="sidebar-logo-icon" size={24} />
@@ -93,6 +152,29 @@ export const AdminDashboardLayout: React.FC<LayoutProps> = ({ children }) => {
         </ul>
 
         <div className="sidebar-footer">
+          {deferredPrompt && (
+            <button 
+              onClick={handleInstallClick} 
+              className="nav-link install-btn"
+              style={{
+                width: '100%',
+                background: '#10b981',
+                color: 'white',
+                border: 'none',
+                padding: '10px',
+                borderRadius: '12px',
+                marginBottom: '10px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontWeight: '600',
+                justifyContent: 'center'
+              }}
+            >
+              <Sprout size={18} /> Install App
+            </button>
+          )}
           <button onClick={handleLogout} className="nav-link logout-btn">
             <FiLogOut className="nav-icon" /><span>Logout</span>
           </button>

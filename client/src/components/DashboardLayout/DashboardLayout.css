@@ -178,20 +178,42 @@
 
 /* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
+  .mobile-sidebar-toggle {
+    display: flex !important;
+  }
+
   .sidebar {
-    width: 80px;
-    align-items: center;
+    position: fixed;
+    top: 0;
+    left: -280px;
+    height: 100vh;
+    width: 280px;
+    z-index: 1005;
+    transition: left 0.3s ease-in-out;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+    background-color: #ffffff !important;
+    align-items: stretch;
+  }
+
+  .sidebar.open {
+    left: 0 !important;
   }
 
   .main-content {
-    padding: 1rem; /* Prevents oversized text node overlap on mobile viewports */
+    padding: 1rem !important;
+    padding-top: 70px !important; /* Avoid overlay top bar collisions */
+    width: 100%;
   }
 
   .sidebar-header h1,
   .nav-link span,
   .sidebar-section-title,
   .active-dot {
-    display: none;
+    display: block !important;
+  }
+
+  .sidebar-logo-container {
+    display: flex !important;
   }
 
   .sidebar-logo-container {
